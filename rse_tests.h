@@ -42,8 +42,8 @@ namespace rse {
 		}
 
 
-		const char* PORT_STR = "27050";
-		const int PORT_NUM = 27050;
+		const char* PORT_STR = "27051";
+		const int PORT_NUM = 27051;
 		constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
         //constexpr size_t PAYLOAD_SIZE = 1024 * 1024;
         bool g_receiver_succeed_flag = false;
