@@ -219,7 +219,7 @@ namespace rse {
             TransmissionInfo handshake = { 0 };
 
             if (!rbudp::ReceiveConnections(hostname, port_str, port_num, rc_sockets)) {
-                debug_printf("receiving connections failed\n");
+                debug_printf("[receiver]: receiving connections failed\n");
                 return false;
             }
             sk::SocketHandle socket_udp = rc_sockets.socket_udp;
@@ -230,7 +230,7 @@ namespace rse {
                 rse::sk::CloseSocket(socket_udp);
                 rse::sk::CloseSocket(socket_listen);
                 rse::sk::CloseSocket(socket_sender);
-                debug_printf("receiving transmission failed\n");
+                debug_printf("[receiver]: receiving transmission failed\n");
                 return false;
             }
 

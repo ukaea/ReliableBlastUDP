@@ -4,61 +4,6 @@ const char* PORT_STR = "27050";
 const int PORT_NUM = 27050;
 constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
 
-#ifdef _WIN32
-unsigned __stdcall ThreadReceiver(void* payload) {
-
-    rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
-
-    return 0;
-}
-
-unsigned __stdcall ThreadSender(void* payload) {
-
-    rse::TickTock timer = rse::Tick();
-
-    rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
-
-    double t = rse::Tock(timer);
-    fprintf(stdout, "[%lf]\n", t);
-
-    double mbytes = (double)PAYLOAD_SIZE / (double)1024 / (double)1024;
-    double mbytes_per_sec = mbytes / t;
-    double mbits_per_sec = (mbytes * 8) / t;
-
-    fprintf(stdout, "[%lf] MByteps\n", mbytes_per_sec);
-    fprintf(stdout, "[%lf] MBitsps\n", mbits_per_sec);
-
-    return 0;
-}
-#elif __linux__
-
-
-void* ThreadReceiver(void* payload) {
-    rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
-
-    return nullptr;
-}
-
-void* ThreadSender(void* payload) {
-    rse::TickTock timer = rse::Tick();
-
-    rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
-
-    double t = rse::Tock(timer);
-    fprintf(stdout, "[%lf]\n", t);
-
-    double mbytes = (double)PAYLOAD_SIZE / (double)1024 / (double)1024;
-    double mbytes_per_sec = mbytes / t;
-    double mbits_per_sec = (mbytes * 8) / t;
-
-    fprintf(stdout, "[%lf] MByteps\n", mbytes_per_sec);
-    fprintf(stdout, "[%lf] MBitsps\n", mbits_per_sec);
-
-    return nullptr;
-}
-
-#endif
-
 namespace rse {
 
 	namespace test {
@@ -117,8 +62,9 @@ namespace rse {
 
             rse::TickTock timer = rse::Tick();
 
-            rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
-
+            bool result = rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
+            if (!result) return nullptr;
+            
             double t = rse::Tock(timer);
             fprintf(stdout, "[%lf]\n", t);
 
@@ -136,14 +82,14 @@ namespace rse {
 
         void* ThreadReceiver(void* payload) {
             rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
-
             return nullptr;
         }
 
         void* ThreadSender(void* payload) {
             rse::TickTock timer = rse::Tick();
 
-            rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
+            bool result = rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
+            if (!result) return nullptr;
 
             double t = rse::Tock(timer);
             fprintf(stdout, "[%lf]\n", t);
@@ -198,7 +144,9 @@ namespace rse {
             }
 
             WaitForSingleObject(thread_handle_receiver, INFINITE);
+            debug_printf("Receiver thread finished\n");
             WaitForSingleObject(thread_handle_sender, INFINITE);
+            debug_printf("Sender thread finished\n");
 
             CloseHandle(thread_handle_receiver);
             CloseHandle(thread_handle_sender);
@@ -219,10 +167,11 @@ namespace rse {
                 printf("Failed to create thread\n");
                 return false;
             }
-
-            pthread_join(thread_ID_receiver, NULL);
+  
             pthread_join(thread_ID_sender, NULL);
-
+            debug_printf("Sender thread finished\n");
+            pthread_join(thread_ID_receiver, NULL);
+            debug_printf("Receiver thread finished\n");
 #endif
             rse::sk::Cleanup();
 

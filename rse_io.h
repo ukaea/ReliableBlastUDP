@@ -3,6 +3,7 @@
 #include <Windows.h>
 #elif __linux__
 #include <sys/mman.h>
+#include <fcntl.h>
 #endif
 
 #include "rse_ds.h"

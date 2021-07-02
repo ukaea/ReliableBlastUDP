@@ -63,6 +63,11 @@ namespace rse {
 }
 #endif
 
+// For testing
+//#define RSE_TEST_SOCKET_SEND_FAILED
+//#define RSE_TEST_SOCKET_RECV_FAILED
+//#define RSE_TEST_SOCKET_PACKET_LOSS
+
 namespace rse {
 
     namespace sk {
@@ -403,16 +408,16 @@ namespace rse {
         }
 
         inline SocketError SendTo(SocketHandle handle, const char* buffer, int len, int flags, const sockaddr * addr, int addrlen) {
-//#define TESTING
-#ifdef TESTING
-            int r = rand() % 100;
-            if (r < 1) {
-                return 0;
-            } // don't send but pretend you did (to simulate lost packets in testing)
-            return sendto(handle, buffer, len, flags, addr, addrlen);;
-#else
-            return sendto(handle, buffer, len, flags, addr, addrlen);
-#endif
+
+            #ifdef RSE_TEST_SOCKET_PACKET_LOSS
+                int r = rand() % 100;
+                if (r < 1) {
+                    return 0;
+                } // don't send but pretend you did (to simulate lost packets in testing)
+                return sendto(handle, buffer, len, flags, addr, addrlen);
+            #else
+                return sendto(handle, buffer, len, flags, addr, addrlen);
+            #endif
         }
 
         inline SocketError RecvFrom(SocketHandle handle, char* buffer, int len, int flags, sockaddr * addr, int* addrlen) {
@@ -420,11 +425,21 @@ namespace rse {
         }
 
         inline SocketError Recv(SocketHandle handle, char* buffer, int len, int flags) {
-            return recv(handle, buffer, len, 0);
+
+            #ifdef RSE_TEST_SOCKET_RECV_FAILED
+                return SK_ERROR_SOCKET;
+            #else
+                return recv(handle, buffer, len, 0);
+            #endif
         }
 
         inline SocketError Send(SocketHandle handle, const char* data, int size, int flags) {
-            return send(handle, data, size, flags);
+
+            #ifdef RSE_TEST_SOCKET_SEND_FAILED
+                return SK_ERROR_SOCKET;
+            #else 
+                return send(handle, data, size, flags);
+            #endif
         }
 
     }
