@@ -80,8 +80,6 @@ namespace rse {
 
         bool ReceiveTransmissionInfoAndReply(const ReceiverSockets& in, TransmissionInfo& info) {
 
-            sk::SocketHandle socket_udp = in.socket_udp;
-            sk::SocketHandle socket_listen = in.socket_listen;
             sk::SocketHandle socket_sender = in.socket_sender;
             sk::SocketError result;
             info = { 0 };
@@ -219,10 +217,6 @@ namespace rse {
 
             ReceiverSockets rc_sockets;
             TransmissionInfo handshake = { 0 };
-            sk::SocketError result;
-            char* packet_buffer = nullptr; // Buffer used to temp store back data before copied to disk
-            timeval tval = { 0 };
-            int len = sizeof(sockaddr_in);
 
             if (!rbudp::ReceiveConnections(hostname, port_str, port_num, rc_sockets)) {
                 debug_printf("receiving connections failed\n");
@@ -314,7 +308,7 @@ namespace rse {
 
 
         bool SendPackets(const TransmissionInfo &handshake, SenderSockets s_sockets,
-            const int block_size,
+            const uint32_t block_size,
             const char* filename, const char* hostname, int port_num, size_t send_file_size) {
 
             sk::SocketError result;
@@ -337,7 +331,7 @@ namespace rse {
             rse::Bitmap recv_bitmap(handshake.number_packets);
             char* packet_buffer = new char[handshake.packet_size];
             char* recv_bitmap_buffer = new char[handshake.bitmap_size];
-            int sent_packets = 0;
+            uint32_t sent_packets = 0;
 
             // Keep sending until our bitmap is fully set
             while (true) {
@@ -354,10 +348,10 @@ namespace rse {
 
                         debug_printf("[sender]: sending packet [%d]\n", i);
 
-                        int offset_start = i * block_size;
-                        int offset_end = offset_start + block_size;
+                        uint32_t offset_start = i * block_size;
+                        uint32_t offset_end = offset_start + block_size;
                         if (offset_end > send_file_size) offset_end = send_file_size;
-                        int send_size = offset_end - offset_start;
+                        uint32_t send_size = offset_end - offset_start;
 
                         memset(packet_buffer, 0, handshake.packet_size);
                         // Copy packet header into packet buffer
@@ -396,7 +390,7 @@ namespace rse {
                 recv_bitmap.Print();
 
                 bool has_sent_all_flag = true;
-                for (int i = 0; i < recv_bitmap.Size(); i++) {
+                for (size_t i = 0; i < recv_bitmap.Size(); i++) {
                     if (!recv_bitmap[i]) {
                         has_sent_all_flag = false;
                         break;

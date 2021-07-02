@@ -1,6 +1,10 @@
+#ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
-
 #include <process.h>    /* _beginthread, _endthread */
+#elif __linux__
+#include <pthread.h>
+#endif
+
 #include <cstdint>
 #include <new>
 #include <vector>
@@ -10,14 +14,14 @@
 #include "rse_perf.h"
 #include "rse_rbudp.h"
 #include "rse_io.h"
-//#define printf(x) (void)0
 #include "rse_ds.h"
 
 const char* PORT_STR = "27050";
 const int PORT_NUM = 27050;
-constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
-//constexpr size_t PAYLOAD_SIZE = 64;
+//constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
+constexpr size_t PAYLOAD_SIZE = 64;
 
+#ifdef _WIN32
 unsigned __stdcall ThreadReceiver(void* payload) {
 
     rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
@@ -43,13 +47,37 @@ unsigned __stdcall ThreadSender(void* payload) {
 
     return 0;
 }
+#elif __linux__
+
+
+void *ThreadReceiver( void *payload ) {
+    rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
+
+    return nullptr;
+}
+
+void *ThreadSender( void* payload ) {
+    rse::TickTock timer = rse::Tick();
+
+    rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
+
+    double t = rse::Tock(timer);
+    fprintf(stdout, "[%lf]\n", t);
+
+    double mbytes = (double)PAYLOAD_SIZE / (double)1024 / (double)1024;
+    double mbytes_per_sec = mbytes / t;
+    double mbits_per_sec = (mbytes * 8) / t;
+
+    fprintf(stdout, "[%lf] MByteps\n", mbytes_per_sec);
+    fprintf(stdout, "[%lf] MBitsps\n", mbits_per_sec);
+
+    return nullptr;
+}
+
+#endif
 
 // Blast udp
 int main() {
-
-    //rse::io::TestMemMap();
-
-    //return 0;
 
     printf("Starting Blast UDP...\n");
 
@@ -70,6 +98,7 @@ int main() {
     fclose(file);
     delete[] data;
 
+#ifdef _WIN32
     unsigned thread_ID_sender;
     unsigned thread_ID_receiver;
 
@@ -80,7 +109,7 @@ int main() {
     }
     HANDLE thread_handle_sender = (HANDLE)_beginthreadex(nullptr, 0, &ThreadSender, nullptr, 0, &thread_ID_sender);
     if (thread_handle_sender == 0) {
-        printf("Failed to begin thread\n");
+        printf("Failed to create thread\n");
         CloseHandle(thread_handle_receiver);
         return 0;
     }
@@ -90,7 +119,28 @@ int main() {
 
     CloseHandle(thread_handle_receiver);
     CloseHandle(thread_handle_sender);
+#elif __linux__
 
+    pthread_t thread_ID_sender;
+    pthread_t thread_ID_receiver;
+    int return_sender;
+    int return_receiver;
+
+    return_sender = pthread_create( &thread_ID_sender, nullptr, ThreadSender, nullptr);
+    if (return_sender) {
+        printf("Failed to create thread\n");
+        return 0;
+    }
+    return_receiver = pthread_create( &thread_ID_receiver, nullptr, ThreadReceiver, nullptr);
+    if (return_receiver) {
+        printf("Failed to create thread\n");
+        return 0;
+    }
+
+    pthread_join( thread_ID_receiver, NULL);
+	pthread_join( thread_ID_sender, NULL);
+
+#endif
     rse::sk::Cleanup();
 
     // Open the file and check that it contains all 'a'

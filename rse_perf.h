@@ -1,5 +1,4 @@
 #pragma once
-#include <Windows.h>
 
 #include "rse_ds.h"
 

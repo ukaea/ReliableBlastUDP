@@ -1,5 +1,9 @@
 #pragma once
+#ifdef _WIN32
 #include <Windows.h>
+#elif __linux__
+#include <sys/mman.h>
+#endif
 
 #include "rse_ds.h"
 
@@ -11,8 +15,6 @@ namespace rse {
 			READ_WRITE,
 			READ_ONLY
 		};
-
-
 
 		// Attempts top open a file and read it's content into an allocated 
 		// buffer with malloc. It's up to you to free this.
@@ -37,8 +39,10 @@ namespace rse {
 		// This is mostly just for windows
 		struct MemMap {
 			void* ptr = nullptr;
+			#ifdef _WIN32
 			HANDLE h_file = 0;
 			HANDLE h_mapping_obj = 0;
+			#endif
 			uint64_t num_bytes = 0;
 		};
 
@@ -46,6 +50,8 @@ namespace rse {
 		void UnmapMemory(const MemMap& m) {
 			if (m.ptr == nullptr) return;
 
+
+			#ifdef _WIN32
 			FlushViewOfFile(
 				m.ptr,
 				m.num_bytes
@@ -53,6 +59,10 @@ namespace rse {
 			UnmapViewOfFile(m.ptr);
 			CloseHandle(m.h_mapping_obj);
 			CloseHandle(m.h_file);
+			#else 
+			
+			munmap(m.ptr, m.num_bytes);
+			#endif
 		}
 
 		// Because windows is stupid we need an api
@@ -60,8 +70,9 @@ namespace rse {
 		// This is not thread safe
 		bool MapMemory(const char* filename, uint64_t size, MemMapIO io, MemMap &m) {
 	
-			if (size == 0) return false;
 
+			if (size == 0) return false;
+#ifdef _WIN32
 			DWORD file_io;
 			DWORD file_map_io;
 			DWORD map_view_io;
@@ -118,6 +129,36 @@ namespace rse {
 				CloseHandle(m.h_file);
 				return false;
 			}
+#elif __linux__
+			int fd = -1;
+			int prot = 0;
+			switch (io) {
+				case MemMapIO::READ_ONLY:
+					prot = PROT_READ;
+					fd = open(filename, O_CREAT | O_RDONLY);
+					break;
+				case MemMapIO::READ_WRITE:
+					prot = PROT_READ | PROT_WRITE;
+					fd = open(filename, O_CREAT | O_RDWR);
+					break;
+			}
+
+			if (fd == -1) {
+				debug_printf("Failed to open file [%s]\n", strerror(errno));
+				return false;
+			}
+
+			char *ptr = (char*)mmap(nullptr, size, prot, MAP_SHARED, fd, 0);	
+			close(fd);
+			if (ptr == MAP_FAILED) {
+				debug_printf("Failed to map file [%s]\n", strerror(errno));
+				return false;
+			}
+
+			m.ptr = ptr;
+			m.num_bytes = size;
+#endif 
+
 			return true;
 		}
 
@@ -137,6 +178,8 @@ namespace rse {
 			memcpy(mem_map.ptr, buffer, 64);
 
 			UnmapMemory(mem_map);
+
+			return true;
 		}
 
 	}

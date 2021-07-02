@@ -416,7 +416,7 @@ namespace rse {
         }
 
         inline SocketError RecvFrom(SocketHandle handle, char* buffer, int len, int flags, sockaddr * addr, int* addrlen) {
-            return recvfrom(handle, buffer, len, flags, addr, addrlen);
+            return recvfrom(handle, buffer, len, flags, addr, (socklen_t*)addrlen);
         }
 
         inline SocketError Recv(SocketHandle handle, char* buffer, int len, int flags) {

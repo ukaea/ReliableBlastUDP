@@ -4,8 +4,14 @@
 #include <cstdint>
 #include <assert.h>
 
+#ifdef __linux__
+    #include <sys/time.h>
+#endif
+
+
 namespace rse {
 
+#ifdef _WIN32
     struct TickTock {
         LARGE_INTEGER start_time;
         double freq;
@@ -25,6 +31,25 @@ namespace rse {
         QueryPerformanceCounter(&cur_time);
         return (double)(cur_time.QuadPart - tick_tock.start_time.QuadPart) / tick_tock.freq;
     }
+#elif __linux__
+    struct TickTock {
+        struct timeval wclk_t;
+    };
+
+    TickTock Tick() {
+        TickTock tick_tock;
+        gettimeofday(&tick_tock.wclk_t, 0);
+        return tick_tock;
+    }
+
+    double Tock(const TickTock& tick_tock) {
+        struct timeval tv;
+        gettimeofday(&tv, 0);
+        double t = (double)(tv.tv_sec - tick_tock.wclk_t.tv_sec);
+        t += (double)(tv.tv_usec - tick_tock.wclk_t.tv_usec) / 1000000;
+        return t;
+   }
+#endif
 
     struct Bitmap {
 
@@ -50,36 +75,36 @@ namespace rse {
         }
         uint8_t* Data() { return bitmap; }
 
-        void Set(int index) {
-            int byte_index = index / 8;
-            int bit_index = index % 8;
+        void Set(size_t index) {
+            size_t byte_index = index / 8;
+            size_t bit_index = index % 8;
             if (byte_index >= capacity) throw;
             bitmap[byte_index] |= 1 << bit_index;
         }
 
-        void Unset(int index) {
-            int byte_index = index / 8;
-            int bit_index = index % 8;
+        void Unset(size_t index) {
+            size_t byte_index = index / 8;
+            size_t bit_index = index % 8;
             if (byte_index >= capacity) throw;
             bitmap[byte_index] &= ~(1 << bit_index);
         }
 
-        bool Get(int index) {
-            int byte_index = index / 8;
-            int bit_index = index % 8;
+        bool Get(size_t index) {
+            size_t byte_index = index / 8;
+            size_t bit_index = index % 8;
             if (byte_index >= capacity) throw;
             return bitmap[byte_index] & (1 << bit_index);
         }
 
-        bool operator[](int index) {
+        bool operator[](size_t index) {
             return Get(index);
         }
 
         void Print() {
 
-            for (int i = 0; i < size; i++) {
-                int byte_index = i / 8;
-                int bit_index = i % 8;
+            for (size_t i = 0; i < size; i++) {
+                size_t byte_index = i / 8;
+                size_t bit_index = i % 8;
                 int a = bitmap[byte_index] & (1 << bit_index);
                // if (a) printf("1");
                 //else printf("0");
