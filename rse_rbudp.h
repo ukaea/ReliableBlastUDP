@@ -441,7 +441,7 @@ namespace rse {
             if (!SenderConnect(hostname, port_str, send_sockets)) {
                 return false;
             }
-            printf("Connection time [%lf]\n", Tock(a));
+            debug_printf("[sender]: connection time [%lf]\n", Tock(a));
 
             a = Tick();
             // Specify how many packets we want to send along with the size of their payloads.
@@ -452,11 +452,11 @@ namespace rse {
                 sk::CloseSocket(send_sockets.socket_udp);
                 return false;
             }
-            printf("Handshake time [%lf]\n", Tock(a));
+            debug_printf("[sender]: Handshake time [%lf]\n", Tock(a));
 
             a = Tick();
             bool ret_val = SendPackets(handshake, send_sockets, block_size, filename, hostname, port_num, send_file_size);
-            printf("Send time [%lf]\n", Tock(a));
+            debug_printf("[sender]: Send time [%lf]\n", Tock(a));
 
             debug_printf("[sender]: telling sender I am finished\n");
             uint8_t flag = 0;

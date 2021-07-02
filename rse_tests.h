@@ -1,9 +1,5 @@
 #pragma once
 
-const char* PORT_STR = "27050";
-const int PORT_NUM = 27050;
-constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
-
 namespace rse {
 
 	namespace test {
@@ -49,11 +45,14 @@ namespace rse {
 		const char* PORT_STR = "27050";
 		const int PORT_NUM = 27050;
 		constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
+        //constexpr size_t PAYLOAD_SIZE = 1024 * 1024;
+        bool g_receiver_succeed_flag = false;
+        bool g_sender_succeed_flag = false;
 
 #ifdef _WIN32
         unsigned __stdcall ThreadReceiver(void* payload) {
 
-            rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
+            g_receiver_succeed_flag = rse::rbudp::WaitToReceive("127.0.0.1", PORT_STR, PORT_NUM);
 
             return 0;
         }
@@ -62,8 +61,11 @@ namespace rse {
 
             rse::TickTock timer = rse::Tick();
 
-            bool result = rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
-            if (!result) return nullptr;
+            g_sender_succeed_flag = rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
+            if (!g_sender_succeed_flag) {
+                debug_printf("[sender]: failed to send file\n");
+                return 0;
+            }
             
             double t = rse::Tock(timer);
             fprintf(stdout, "[%lf]\n", t);
@@ -89,7 +91,10 @@ namespace rse {
             rse::TickTock timer = rse::Tick();
 
             bool result = rse::rbudp::SendFile("send_test.txt", "test.txt", "127.0.0.1", PORT_STR, PORT_NUM, 4096);
-            if (!result) return nullptr;
+            if (!result) {
+                debug_printf("[sender]: failed to send file\n");
+                return nullptr;
+            }
 
             double t = rse::Tock(timer);
             fprintf(stdout, "[%lf]\n", t);
@@ -175,6 +180,10 @@ namespace rse {
 #endif
             rse::sk::Cleanup();
 
+            if (g_receiver_succeed_flag == false || g_sender_succeed_flag == false) {
+                return false;
+            }
+
             // Open the file and check that it contains all 'a'
             size_t test_txt_size = 0;
             char* buffer = rse::io::AllocateIntoBuffer("test.txt", test_txt_size);
@@ -189,7 +198,7 @@ namespace rse {
                 return false;
             }
             for (size_t i = 0; i < PAYLOAD_SIZE; i++) {
-                debug_printf("%c", buffer[i]);
+                //debug_printf("%c", buffer[i]);
                 if (buffer[i] != 'b') {
                     printf("\nFail on reading test.txt [%c][%lu]\n", buffer[i], i);
                     free(buffer);

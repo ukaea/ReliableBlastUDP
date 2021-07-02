@@ -22,7 +22,7 @@ int main() {
 
     if (!rse::test::TestBitmap()) printf("bitmap test failed\n");
     if (!rse::test::TestMemMap()) printf("memmap test failed\n");
-    rse::test::TestRBUDP();
+    if (!rse::test::TestRBUDP()) printf("rbudp test failed\n");
 
     return 1;
 }

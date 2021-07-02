@@ -68,6 +68,8 @@ namespace rse {
 //#define RSE_TEST_SOCKET_RECV_FAILED
 //#define RSE_TEST_SOCKET_PACKET_LOSS
 
+#define RSE_TEST_SOCKET_PACKET_LOSS_PERCENTAGE 7
+
 namespace rse {
 
     namespace sk {
@@ -411,7 +413,8 @@ namespace rse {
 
             #ifdef RSE_TEST_SOCKET_PACKET_LOSS
                 int r = rand() % 100;
-                if (r < 1) {
+                if (r < RSE_TEST_SOCKET_PACKET_LOSS_PERCENTAGE) {
+                    debug_printf("packet lost!\n");
                     return 0;
                 } // don't send but pretend you did (to simulate lost packets in testing)
                 return sendto(handle, buffer, len, flags, addr, addrlen);
