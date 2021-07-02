@@ -30,7 +30,10 @@ namespace rse {
 			fseek(file, 0, SEEK_SET);  /* same as rewind(f); */
 
 			char* buffer = (char*)malloc(out_size);
-			if (buffer == nullptr) return nullptr;
+			if (buffer == nullptr) {
+				fclose(file);
+				return nullptr;
+			}
 			fread(buffer, 1, out_size, file);
 			fclose(file);
 
@@ -131,6 +134,22 @@ namespace rse {
 				return false;
 			}
 #elif __linux__
+			
+			// create a file on disk of the right size
+			FILE* f = nullptr;
+			f = fopen(filename, "w");
+			if (f == nullptr) {
+				debug_printf("Failed to open file [%d][%s]\n", errno, strerror(errno));
+				return false;
+			}
+			fseek(f, size , SEEK_SET);
+			int fputresult = fputc('\0', f); // expand the file to the set size
+			fclose(f);
+			if (fputresult == EOF) {
+				debug_printf("Failed to open file [%d][%s]\n", errno, strerror(errno));
+				return false;
+			}
+
 			int fd = -1;
 			int prot = 0;
 			switch (io) {
@@ -145,14 +164,14 @@ namespace rse {
 			}
 
 			if (fd == -1) {
-				debug_printf("Failed to open file [%s]\n", strerror(errno));
+				debug_printf("Failed to open file [%d][%s]\n", errno, strerror(errno));
 				return false;
 			}
 
-			char *ptr = (char*)mmap(nullptr, size, prot, MAP_SHARED, fd, 0);	
+			char *ptr = (char*)mmap(nullptr, size, prot, MAP_PRIVATE, fd, 0);	
 			close(fd);
 			if (ptr == MAP_FAILED) {
-				debug_printf("Failed to map file [%s]\n", strerror(errno));
+				debug_printf("Failed to map file [%d][%s]\n", errno, strerror(errno));
 				return false;
 			}
 

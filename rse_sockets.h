@@ -82,7 +82,7 @@ namespace rse {
 #ifdef _WIN32
             printf("Error [%d]: ", WSAGetLastError());
 #elif __linux__
-            printf("Error [%d]: ", errno);
+            printf("Error [%d][%s]: ", errno, strerror(errno));
 #endif
 
             va_list args;

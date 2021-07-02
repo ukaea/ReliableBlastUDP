@@ -20,8 +20,14 @@
 // Blast udp
 int main() {
 
-    if (!rse::test::TestBitmap()) printf("bitmap test failed\n");
-    if (!rse::test::TestMemMap()) printf("memmap test failed\n");
+    if (!rse::test::TestBitmap()) {
+        printf("bitmap test failed\n");
+        return false;
+    } 
+    if (!rse::test::TestMemMap()) {
+        printf("memmap test failed\n");
+        return false;
+    }
     if (!rse::test::TestRBUDP()) printf("rbudp test failed\n");
 
     return 1;
