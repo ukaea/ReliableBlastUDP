@@ -162,26 +162,6 @@ namespace rse {
 			return true;
 		}
 
-
-		static bool TestMemMap() {
-
-			const size_t SIZE = 64;
-			static char buffer[SIZE];
-
-			MemMap mem_map;
-			if (!MapMemory("mem_map_test.txt", 64, MemMapIO::READ_WRITE, mem_map)) {
-				printf("Failed to mem map file\n");
-				return false;
-			}
-
-			memset(buffer, 'a', 64);
-			memcpy(mem_map.ptr, buffer, 64);
-
-			UnmapMemory(mem_map);
-
-			return true;
-		}
-
 	}
 
 

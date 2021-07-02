@@ -1,5 +1,5 @@
 #pragma once
-#define RSE_DEBUG
+//#define RSE_DEBUG
 
 #ifdef RSE_DEBUG
 #define debug_printf(...) printf(__VA_ARGS__)

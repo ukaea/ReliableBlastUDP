@@ -112,17 +112,6 @@ namespace rse {
            // printf("\n");
         }
 
-        static void Test() {
-            rse::Bitmap bitmap(10);
-            bitmap.Set(1);
-            bitmap.Set(9);
-            bitmap.Set(3);
-            bitmap.Set(4);
-            bitmap.Unset(3);
-            bitmap.Print();
-            for (int i = 0; i < 10; ++i) if (bitmap[i]) printf("[%d]\n", i);
-        }
-
         ~Bitmap() {
             delete[] bitmap;
         }
