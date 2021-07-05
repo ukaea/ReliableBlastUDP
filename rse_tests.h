@@ -5,7 +5,7 @@ namespace rse {
 	namespace test {
 
         // putting tests in one place for now
-
+        
         bool TestBitmap() {
             rse::Bitmap bitmap(10);
             
@@ -42,10 +42,10 @@ namespace rse {
 		}
 
 
-		const char* PORT_STR = "27051";
-		const int PORT_NUM = 27051;
-		constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
-        //constexpr size_t PAYLOAD_SIZE = 1024 * 1024;
+		const char* PORT_STR = "27055";
+		const int PORT_NUM = 27055;
+		//constexpr size_t PAYLOAD_SIZE = 1 * 1024 * 1024 * 1024;
+        constexpr size_t PAYLOAD_SIZE = 1024;
         bool g_receiver_succeed_flag = false;
         bool g_sender_succeed_flag = false;
 
@@ -120,6 +120,7 @@ namespace rse {
             }
 
             // Lets write a 2 gig file 
+            debug_printf("writing and allocating file\n");
             FILE* file = fopen("send_test.txt", "wb");
             if (file == NULL) {
                 rse::sk::Cleanup();
@@ -132,6 +133,7 @@ namespace rse {
             fclose(file);
             delete[] data;
 
+            debug_printf("starting threads\n");
 #ifdef _WIN32
             unsigned thread_ID_sender;
             unsigned thread_ID_receiver;
