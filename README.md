@@ -1,6 +1,7 @@
-This is an basic implementation of: https://www.evl.uic.edu/cavern/papers/cluster2002.pdf
+# An implementation of Reliable Blast UDP
 
-At the moment the implementation only works on windows.
+This is an basic implementation of a [paper](https://www.evl.uic.edu/cavern/papers/cluster2002.pdf) by Eric He, Jason Leigh, Oliver Yu,
+Thomas DeFanti from the Electronic Visualization Laboratory, University of Illinois at Chicago.
 
 Reliable Blast UDP is a protocol designed to send large files quickly over a network.
 
