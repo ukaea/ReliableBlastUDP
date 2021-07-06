@@ -5,10 +5,10 @@ namespace rse {
 	namespace test {
 
         // putting tests in one place for now
-        
+
         bool TestBitmap() {
             rse::Bitmap bitmap(10);
-            
+
             bitmap.Set(1);
             if (bitmap.Get(1) == false) return false;
             bitmap.Set(9);
@@ -66,7 +66,7 @@ namespace rse {
                 debug_printf("[sender]: failed to send file\n");
                 return 0;
             }
-            
+
             double t = rse::Tock(timer);
             fprintf(stdout, "[%lf]\n", t);
 
@@ -119,7 +119,7 @@ namespace rse {
                 return false;
             }
 
-            // Lets write a 2 gig file 
+            // Lets write a 2 gig file
             debug_printf("writing and allocating file\n");
             FILE* file = fopen("send_test.txt", "wb");
             if (file == NULL) {
@@ -174,7 +174,7 @@ namespace rse {
                 printf("Failed to create thread\n");
                 return false;
             }
-  
+
             pthread_join(thread_ID_sender, NULL);
             debug_printf("Sender thread finished\n");
             pthread_join(thread_ID_receiver, NULL);
