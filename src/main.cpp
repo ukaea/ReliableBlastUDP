@@ -23,7 +23,7 @@ int main() {
     if (!rse::test::TestBitmap()) {
         printf("bitmap test failed\n");
         return false;
-    } 
+    }
     if (!rse::test::TestMemMap()) {
         printf("memmap test failed\n");
         return false;

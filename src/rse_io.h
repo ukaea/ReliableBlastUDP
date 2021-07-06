@@ -17,7 +17,7 @@ namespace rse {
 			READ_ONLY
 		};
 
-		// Attempts top open a file and read it's content into an allocated 
+		// Attempts top open a file and read it's content into an allocated
 		// buffer with malloc. It's up to you to free this.
 		char* AllocateIntoBuffer(const char* filename, size_t &out_size) {
 			FILE *file = fopen("test.txt", "rb");
@@ -63,7 +63,7 @@ namespace rse {
 			UnmapViewOfFile(m.ptr);
 			CloseHandle(m.h_mapping_obj);
 			CloseHandle(m.h_file);
-			#else 
+			#else
 			
 			munmap(m.ptr, m.num_bytes);
 			#endif
@@ -124,7 +124,7 @@ namespace rse {
 			m.ptr = MapViewOfFile(
 				m.h_mapping_obj,
 				map_view_io,
-				0, 
+				0,
 				0,
 				size
 			);
@@ -177,7 +177,7 @@ namespace rse {
 
 			m.ptr = ptr;
 			m.num_bytes = size;
-#endif 
+#endif
 
 			return true;
 		}

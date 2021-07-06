@@ -29,7 +29,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <poll.h>
 #include <sys/time.h>
 #include <fcntl.h>
@@ -40,9 +40,9 @@
 #ifdef _WIN32
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib") // only works with msvc
-#endif 
+#endif
 
-#ifdef _WIN32 
+#ifdef _WIN32
 
 namespace rse {
     namespace sk {
@@ -141,9 +141,9 @@ namespace rse {
 #ifdef _WIN32
             //-------------------------
             // Set the socket I/O mode: In this case FIONBIO
-            // enables or disables the blocking mode for the 
+            // enables or disables the blocking mode for the
             // socket based on the numerical value of iMode.
-            // If iMode = 0, blocking is enabled; 
+            // If iMode = 0, blocking is enabled;
             // If iMode != 0, non-blocking mode is enabled.
             u_long iMode = !isBlocking;
             int result = ioctlsocket(sock, FIONBIO, &iMode);
@@ -171,7 +171,7 @@ namespace rse {
         }
 
         // Binds an address to a socket. This is typicall used for
-        // a listen socket, where the server's/sockets address is bound to it 
+        // a listen socket, where the server's/sockets address is bound to it
         SocketError Bind(SocketHandle sock, addrinfo* socketsAddr) {
 
             int result = bind(sock, socketsAddr->ai_addr, (int)socketsAddr->ai_addrlen);
@@ -222,7 +222,7 @@ namespace rse {
                 if (errno == EINPROGRESS || errno == EAGAIN) {
 #endif
 
-                    // We need to check if the socket is actually connected 
+                    // We need to check if the socket is actually connected
                     // we do this by using select and checking if the socket is read for writing
                     fd_set checkSet;
                     FD_ZERO(&checkSet);
@@ -264,7 +264,7 @@ namespace rse {
         }
 
         // Shuts down certain aspects of an established connection.
-        // For instance we can shut down the send part of a connection 
+        // For instance we can shut down the send part of a connection
         // by setting how to the right flag
         SocketError Shutdown(SocketHandle sock, int how) {
 
@@ -320,7 +320,7 @@ namespace rse {
             addrinfo hintaddr;
             memset(&hintaddr, 0, sizeof(addrinfo));
             hintaddr.ai_family = AF_INET; // IPV4 protocol
-            hintaddr.ai_socktype = SOCK_STREAM; // TCP 
+            hintaddr.ai_socktype = SOCK_STREAM; // TCP
             hintaddr.ai_protocol = IPPROTO_TCP;
             hintaddr.ai_flags = AI_PASSIVE;
 
@@ -368,13 +368,13 @@ namespace rse {
                 return SK_INVALID_SOCKET;
             }
 
-            // I don't know why really to use the getaddrinfo linked 
+            // I don't know why really to use the getaddrinfo linked
             // list here but i'm just going to use it any way
             SocketHandle clientSocket = SK_INVALID_SOCKET;
             addrinfo* curAddr = nullptr;
             for (curAddr = resultAddr; curAddr != nullptr; curAddr = resultAddr->ai_next) {
 
-                // Create a socket 
+                // Create a socket
                 clientSocket = Socket(curAddr, is_blocking);
                 if (IsInvalidSocket(clientSocket)) {
                     freeaddrinfo(resultAddr);
@@ -400,7 +400,7 @@ namespace rse {
         // Returns a socket that will be used to sent and recv data from the client.
         SocketHandle AcceptFirstConnectionOnListenSocket(SocketHandle listenSocket) {
 
-            // Accept a client 
+            // Accept a client
             SocketHandle clientSocket = Accept(listenSocket, nullptr, nullptr);
             if (clientSocket == SK_INVALID_SOCKET) {
                 return SK_INVALID_SOCKET;
@@ -440,7 +440,7 @@ namespace rse {
 
             #ifdef RSE_TEST_SOCKET_SEND_FAILED
                 return SK_ERROR_SOCKET;
-            #else 
+            #else
                 return send(handle, data, size, flags);
             #endif
         }

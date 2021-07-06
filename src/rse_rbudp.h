@@ -26,7 +26,7 @@ namespace rse {
         // The packet header consists of:
         //      The first 4 bytes is the header ID. Which is unsigned 32 bit integer.
         // The packet body is user defined. By default it is 4kb
-        
+
         struct PacketHeader {
             uint32_t id;
         };
@@ -41,7 +41,7 @@ namespace rse {
             uint32_t max_packets_per_transmission = 0; // the max number of packets that can be sent given a port has a max size of 65536
             char path_name[PATH_SIZE]; // file path that you want to write to. Must include null terminator
         };
-                
+
         struct ReceiverSockets {
             sk::SocketHandle socket_udp;
             sk::SocketHandle socket_listen;
@@ -55,7 +55,7 @@ namespace rse {
 
 
         bool ReceiveConnections(const char* hostname, const char* port, int port_num, ReceiverSockets& out) {
-            
+
             sk::SocketHandle& socket_udp = out.socket_udp;
             sk::SocketHandle& socket_listen = out.socket_listen;
             sk::SocketHandle& socket_sender = out.socket_sender;
@@ -87,7 +87,7 @@ namespace rse {
             // First 4 bytes are the number packets.
             // Next 4 bytes are the size of the packets.
             debug_printf("[receiver]: waiting to receive tranmission header...\n");
-           
+
             result = sk::Recv(socket_sender, (char*)&info.number_packets, 4, 0);
             if (sk::IsError(result)) { return false; }
             result = sk::Recv(socket_sender, (char*)&info.block_size, 4, 0);
@@ -140,7 +140,7 @@ namespace rse {
 
                 debug_printf("[receiver]: sender is telling me it sent udp stuff\n");
                 if (flag == 0) {
-                    // the sender is done 
+                    // the sender is done
                     return_val = true;
                     debug_printf("[receiver]: sender told me it's happy with transmission and has finished\n");
                     break;
@@ -165,10 +165,10 @@ namespace rse {
                     if (sk::IsError(result)) {
                         debug_printf("[receiver]: error reading packet\n");
                         goto label_cleanup;
-                    } 
+                    }
                     else {
                         uint32_t id = *(uint32_t*)packet_buffer;
-                        // This check ensures that the data we access via the 
+                        // This check ensures that the data we access via the
                         // bitmap is valid
                         if (id >= handshake.number_packets) {
                             debug_printf("[receiver]: packet error\n");
@@ -321,7 +321,7 @@ namespace rse {
             servaddr.sin_port = htons(port_num);
             servaddr.sin_addr.s_addr = inet_addr(hostname);
 
-            // Memory map our file we want to send 
+            // Memory map our file we want to send
             rse::io::MemMap memmap;
             if (!rse::io::MapMemory(filename, send_file_size, rse::io::MemMapIO::READ_ONLY, memmap)) {
                 debug_printf("[sender]: failed to mem map file");
@@ -371,7 +371,7 @@ namespace rse {
                     }
                 }
 
-                // Send a message telling the receiver we are done 
+                // Send a message telling the receiver we are done
                 debug_printf("[sender]: telling receiver I am done\n");
                 uint8_t flag = 1;
                 sk::Send(s_sockets.socket_receiver, (char*)&flag, sizeof(flag), 0);
@@ -399,7 +399,7 @@ namespace rse {
 
                 if (has_sent_all_flag) {
                     return_val = true;
-                    break;              
+                    break;
                 }
             }
 
@@ -417,9 +417,9 @@ namespace rse {
         // Path size must be less than PATH_SIZE
         // Sockets must be initialised
         // block size must be a power of 2
-        bool SendFile(const char* filename, 
+        bool SendFile(const char* filename,
             const char* path_to_write, const char* hostname, const char* port_str, int port_num, const int block_size = DEFAULT_BLOCK_SIZE) {
-           
+
             TickTock a;
 
             a = Tick();
