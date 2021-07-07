@@ -8,7 +8,8 @@ The purpose of this repo is to demonstrate one possible implementation. It is no
 Reliable Blast UDP is a protocol designed to send large files quickly over a network.
 
 It works by primarily sending data via UDP. UDP is fast but not reliable, so both
-the sender and receiver maintain and track the number of blocks that are sent and received.
+the sender and receiver maintain and track the number of blocks that are sent and received via a 
+TCP "handshake".
 If the receiver has not received a certain block it will tell the sender to send it again.
 
 So far the implementation has only been tested on a single machine and not over a network.
